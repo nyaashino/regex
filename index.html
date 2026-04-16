@@ -850,39 +850,14 @@
                 return;
             }
 
-            // 创建区间数组
+            // 创建区间数组 - 只包含整个匹配，不包含捕获组
             const ranges = [];
             
-            // 添加所有匹配区间
-            matches.forEach((match, matchIndex) => {
+            // 添加所有匹配区间（只添加整个匹配，不添加捕获组）
+            matches.forEach((match) => {
                 ranges.push({
                     start: match.index,
-                    end: match.index + match.length,
-                    type: 'match',
-                    matchIndex
-                });
-                
-                // 添加捕获组区间
-                match.groups.forEach((group, groupIndex) => {
-                    if (group.value !== undefined && group.value !== null) {
-                        // 计算捕获组的实际位置
-                        let groupStart = -1;
-                        const matchText = match.value;
-                        const groupValue = group.value;
-                        
-                        if (groupValue) {
-                            groupStart = matchText.indexOf(groupValue);
-                            if (groupStart !== -1) {
-                                groupStart += match.index;
-                                ranges.push({
-                                    start: groupStart,
-                                    end: groupStart + groupValue.length,
-                                    type: 'group',
-                                    groupIndex
-                                });
-                            }
-                        }
-                    }
+                    end: match.index + match.length
                 });
             });
 
@@ -893,19 +868,15 @@
             let result = '';
             let lastEnd = 0;
 
-            ranges.forEach((range, index) => {
+            ranges.forEach((range) => {
                 // 添加未匹配部分
                 if (range.start > lastEnd) {
                     result += escapeHtml(text.substring(lastEnd, range.start));
                 }
 
-                // 添加匹配/捕获组部分
+                // 添加匹配部分
                 const content = escapeHtml(text.substring(range.start, range.end));
-                if (range.type === 'match') {
-                    result += `<mark>${content}</mark>`;
-                } else {
-                    result += `<mark class="group-${(range.groupIndex % 4) + 1}">${content}</mark>`;
-                }
+                result += `<mark>${content}</mark>`;
 
                 lastEnd = Math.max(lastEnd, range.end);
             });
