@@ -263,7 +263,6 @@
             min-height: 200px;
         }
 
-        .highlight-backdrop,
         .highlight-input {
             position: absolute;
             top: 0;
@@ -278,48 +277,29 @@
             overflow: auto;
             white-space: pre-wrap;
             word-wrap: break-word;
-        }
-
-        .highlight-backdrop {
             border: 2px solid #e5e7eb;
             background: #fff;
-            color: transparent;
-            z-index: 1;
-        }
-
-        .highlight-input {
-            background: transparent;
             color: #374151;
-            border: none;
-            z-index: 2;
-            caret-color: #374151;
-            resize: none;
-            outline: none;
         }
 
-        .highlight-input:focus {
-            outline: none;
-        }
-
-        .highlight-backdrop mark {
+        .highlight-input mark {
             background: rgba(102, 126, 234, 0.3);
             border-radius: 3px;
-            padding: 0 2px;
         }
 
-        .highlight-backdrop mark.group-1 {
+        .highlight-input mark.group-1 {
             background: rgba(236, 72, 153, 0.3);
         }
 
-        .highlight-backdrop mark.group-2 {
+        .highlight-input mark.group-2 {
             background: rgba(16, 185, 129, 0.3);
         }
 
-        .highlight-backdrop mark.group-3 {
+        .highlight-input mark.group-3 {
             background: rgba(245, 158, 11, 0.3);
         }
 
-        .highlight-backdrop mark.group-4 {
+        .highlight-input mark.group-4 {
             background: rgba(99, 102, 241, 0.3);
         }
 
@@ -688,8 +668,7 @@
                 </div>
 
                 <div class="highlight-wrapper">
-                    <div class="highlight-backdrop" id="highlightBackdrop"></div>
-                    <textarea class="highlight-input" id="highlightInput" readonly></textarea>
+                    <div class="highlight-input" id="highlightInput"></div>
                 </div>
 
                 <div class="matches-list" id="matchesList">
@@ -723,7 +702,6 @@
         const regexInput = document.getElementById('regexInput');
         const flagsInput = document.getElementById('flagsInput');
         const testInput = document.getElementById('testInput');
-        const highlightBackdrop = document.getElementById('highlightBackdrop');
         const highlightInput = document.getElementById('highlightInput');
         const errorMessage = document.getElementById('errorMessage');
         const errorContent = document.getElementById('errorContent');
@@ -743,18 +721,10 @@
 
         // 初始化
         function init() {
-            // 同步测试文本
-            testInput.value = testInput.value.trim() || '';
-            syncHighlightInput();
-
             // 绑定事件
             regexInput.addEventListener('input', debounce(handleInput, 100));
             flagsInput.addEventListener('input', debounce(handleInput, 100));
             testInput.addEventListener('input', debounce(handleInput, 100));
-
-            // 测试文本滚动同步
-            testInput.addEventListener('scroll', syncScroll);
-            highlightInput.addEventListener('scroll', syncScroll);
 
             // 历史记录
             historyBtn.addEventListener('click', showHistory);
@@ -777,19 +747,6 @@
             };
         }
 
-        // 同步高亮输入框
-        function syncHighlightInput() {
-            highlightInput.value = testInput.value;
-        }
-
-        // 同步滚动
-        function syncScroll(e) {
-            const source = e.target;
-            const target = source === testInput ? highlightInput : testInput;
-            target.scrollTop = source.scrollTop;
-            target.scrollLeft = source.scrollLeft;
-        }
-
         // 转义 HTML 特殊字符
         function escapeHtml(str) {
             const div = document.createElement('div');
@@ -802,9 +759,6 @@
             const pattern = regexInput.value;
             const flags = flagsInput.value;
             const text = testInput.value;
-
-            // 同步测试文本到高亮区域
-            syncHighlightInput();
 
             // 隐藏错误信息
             hideError();
@@ -892,7 +846,7 @@
         // 更新高亮
         function updateHighlight(text, matches) {
             if (matches.length === 0) {
-                highlightBackdrop.innerHTML = escapeHtml(text);
+                highlightInput.innerHTML = escapeHtml(text);
                 return;
             }
 
@@ -961,7 +915,7 @@
                 result += escapeHtml(text.substring(lastEnd));
             }
 
-            highlightBackdrop.innerHTML = result;
+            highlightInput.innerHTML = result;
         }
 
         // 更新统计
@@ -1029,7 +983,7 @@
         // 清空结果
         function clearResults() {
             const text = testInput.value;
-            highlightBackdrop.innerHTML = escapeHtml(text);
+            highlightInput.innerHTML = escapeHtml(text);
             resultStats.style.display = 'none';
             matchesList.innerHTML = `
                 <div class="empty-state">
